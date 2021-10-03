@@ -1,1 +1,37 @@
-// TODO
+.post {
+  img {
+    width: 100%;
+  }
+
+  article {
+    max-width: 700px;
+    margin: 80px auto;
+
+    h1 {
+      font-weight: 700;
+      font-size: 3rem;
+    }
+  }
+}
+
+.info {
+  margin: 24px 0 0 0;
+
+  > span {
+    color: var(--info);
+    font-size: 0.875em;
+    line-height: 1.0625em;
+    margin-right: 24px;
+    display: inline-flex;
+    align-items: center;
+
+    svg {
+      margin-right: 10px;
+      font-size: 1.25em;
+    }
+  }
+}
+
+.content {
+  margin: 80px 0 0 0;
+}

@@ -23,7 +23,10 @@ interface Post {
     author: string;
     content: {
       heading: string;
-      body: string;
+      body: {
+        type: string;
+        text: string;
+      }[];
     }[];
   };
 }
@@ -38,6 +41,21 @@ function formatDate(value: Date): string {
 
 export default function Post({ post }: PostProps): JSX.Element {
   const router = useRouter();
+
+  function calcReadTime(): number {
+    const content = post.data.content.reduce((acc, current) => {
+      return {
+        heading: acc.heading + current.heading,
+        body: [...acc.body, ...current.body],
+      };
+    });
+
+    const text = content.heading + RichText.asText(content.body);
+    const words = text.split(/\s/g);
+    const time = Math.ceil(words.length / 200);
+
+    return time;
+  }
 
   if (router.isFallback) {
     return <div>Carregando...</div>;
@@ -63,7 +81,7 @@ export default function Post({ post }: PostProps): JSX.Element {
             </span>
             <span>
               <FiClock />
-              <span>4 min</span>
+              <span>{calcReadTime()} min</span>
             </span>
           </div>
           <div className={styles.content}>

@@ -3,6 +3,7 @@ import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import Prismic from '@prismicio/client';
+import { Document } from '@prismicio/client/types/documents';
 import { FiCalendar, FiUser } from 'react-icons/fi';
 
 import { getPrismicClient } from '../services/prismic';
@@ -40,9 +41,21 @@ function formatDate(value: string): string {
     .replace('.', '');
 }
 
+function formatPost(post: Document): Post {
+  return {
+    uid: post.uid,
+    first_publication_date: post.first_publication_date,
+    data: {
+      title: post.data.title,
+      subtitle: post.data.subtitle,
+      author: post.data.author,
+    },
+  };
+}
+
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [nextPage, setNextPage] = useState<string | undefined>('0');
+  const [nextPage, setNextPage] = useState('');
 
   useEffect(() => {
     setPosts(postsPagination.results);
@@ -50,26 +63,12 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
   }, [postsPagination]);
 
   async function loadMore(): Promise<void> {
-    const prismic = getPrismicClient();
+    const response = await fetch(nextPage);
+    const body = await response.json();
 
-    const response = await prismic.query(
-      [Prismic.predicates.at('document.type', 'post')],
-      { pageSize: 1 }
-    );
+    const morePosts = body.results.map(formatPost);
 
-    const morePosts = response.results.map(post => {
-      return {
-        uid: post.uid,
-        first_publication_date: post.first_publication_date,
-        data: {
-          title: post.data.title,
-          subtitle: post.data.subtitle,
-          author: post.data.author,
-        },
-      };
-    });
-
-    setNextPage(response.next_page);
+    setNextPage(body.next_page);
     setPosts([...posts, ...morePosts]);
   }
 
@@ -115,17 +114,7 @@ export const getStaticProps: GetStaticProps = async () => {
     { pageSize: 1 }
   );
 
-  const posts = response.results.map(post => {
-    return {
-      uid: post.uid,
-      first_publication_date: post.first_publication_date,
-      data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
-      },
-    };
-  });
+  const posts = response.results.map(formatPost);
 
   return {
     props: {

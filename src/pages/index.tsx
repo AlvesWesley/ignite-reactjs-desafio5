@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Prismic from '@prismicio/client';
 import { Document } from '@prismicio/client/types/documents';
 import { FiCalendar, FiUser } from 'react-icons/fi';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 import { getPrismicClient } from '../services/prismic';
 
@@ -30,15 +32,8 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-function formatDate(value: string): string {
-  return new Date(value)
-    .toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
-    .replaceAll('de ', '')
-    .replace('.', '');
+function formatDate(value: Date): string {
+  return format(value, 'dd MMM yyyy', { locale: ptBR });
 }
 
 function formatPost(post: Document): Post {
@@ -86,7 +81,9 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
                 <p>{post.data.subtitle}</p>
                 <span>
                   <FiCalendar />
-                  <time>{formatDate(post.first_publication_date)}</time>
+                  <time>
+                    {formatDate(new Date(post.first_publication_date))}
+                  </time>
                 </span>
                 <span>
                   <FiUser />
